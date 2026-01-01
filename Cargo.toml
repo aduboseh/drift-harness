@@ -1,0 +1,21 @@
+[package]
+name = "drift-harness"
+version = "1.0.0"
+edition = "2021"
+description = "Determinism verification harness for drift-kernel simulations"
+authors = ["Armonti Du-Bose-Hill <armonti@onlysg.solutions>"]
+license = "Apache-2.0"
+readme = "README.md"
+keywords = ["determinism", "physics", "replay", "verification", "game-engine"]
+categories = ["development-tools::testing", "simulation", "game-engines"]
+
+[dependencies]
+sha2 = "0.10"
+
+[dev-dependencies]
+# Use git dependency until drift-linalg is published to crates.io
+drift-linalg = { git = "https://github.com/aduboseh/drift-linalg.git" }
+
+[[example]]
+name = "basic_verifier"
+path = "examples/basic_verifier.rs"
