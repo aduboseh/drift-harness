@@ -25,7 +25,7 @@
 //! println!("Determinism fingerprint: {}", hash);
 //! ```
 
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 
 mod trace;
 pub use trace::{compute_trace_fingerprint, verify_trace_against, TraceError};
@@ -131,18 +131,16 @@ pub fn compute_fingerprint<S: DeterministicSim>(mut sim: S, config: HarnessConfi
     let empty_input: Vec<u8> = Vec::new();
 
     for tick in 0..config.target_ticks {
-        let input = config.inputs
-            .get(tick as usize)
-            .unwrap_or(&empty_input);
+        let input = config.inputs.get(tick as usize).unwrap_or(&empty_input);
         sim.tick(input);
     }
 
     let snapshot = sim.state_snapshot();
-    
+  
     let mut hasher = Sha256::new();
     hasher.update(&snapshot);
     let result = hasher.finalize();
-    
+  
     // Convert to hex string
     result.iter().map(|b| format!("{:02x}", b)).collect()
 }
@@ -157,7 +155,7 @@ pub fn verify_against<S: DeterministicSim>(
     expected_hash: &str,
 ) -> Result<(), DeterminismError> {
     let actual_hash = compute_fingerprint(sim, config);
-    
+  
     if actual_hash == expected_hash {
         Ok(())
     } else {
@@ -172,10 +170,7 @@ pub fn verify_against<S: DeterministicSim>(
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DeterminismError {
     /// The computed hash did not match the expected hash.
-    HashMismatch {
-        expected: String,
-        actual: String,
-    },
+    HashMismatch { expected: String, actual: String },
 }
 
 impl std::fmt::Display for DeterminismError {
@@ -229,10 +224,10 @@ mod tests {
     fn test_verify_against_success() {
         let sim = CounterSim { value: 0 };
         let config = HarnessConfig::vacuum(100);
-        
+      
         // Pre-compute the expected hash
         let expected = compute_fingerprint(CounterSim { value: 0 }, config.clone());
-        
+      
         // Verify against it
         let result = verify_against(sim, config, &expected);
         assert!(result.is_ok());
@@ -242,7 +237,7 @@ mod tests {
     fn test_verify_against_failure() {
         let sim = CounterSim { value: 0 };
         let config = HarnessConfig::vacuum(100);
-        
+      
         let result = verify_against(sim, config, "wrong_hash");
         assert!(result.is_err());
     }
