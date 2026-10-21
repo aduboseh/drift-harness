@@ -14,7 +14,7 @@ sha2 = "0.10"
 
 [dev-dependencies]
 # Use git dependency until drift-linalg is published to crates.io
-drift-linalg = { git = "https://github.com/aduboseh/drift-linalg.git", rev = "85fe9622909d36de100db02596c80790c174fe45" }
+drift-linalg = { git = "https://github.com/aduboseh/drift-linalg.git", rev = "cf1f056b67262309dc828d934527d7c7f801e958" }
 
 [[example]]
 name = "basic_verifier"
