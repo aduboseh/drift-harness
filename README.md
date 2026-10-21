@@ -4,14 +4,14 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-Verify that simulations built on [drift-kernel](https://github.com/aduboseh/drift-kernel) produce bit-exact results across runs and platforms.
+Compare reproducible simulation executions under a controlled runtime, canonical serialization, and complete state capture. Bit-exact cross-platform behavior is **not** guaranteed by this library.
 
 ## What This Does
 
 1. Runs your simulation for N ticks
 2. Captures a state snapshot
 3. Computes a SHA-256 fingerprint
-4. Compare fingerprints to verify determinism
+4. Compare fingerprints to test replay equivalence within the declared environment; a matching digest is not proof of state completeness
 
 ## Usage
 
@@ -35,6 +35,20 @@ let hash = compute_fingerprint(MySim::new(), HarnessConfig::vacuum(10_000));
 println!("Determinism fingerprint: {}", hash);
 ```
 
+## Ordered-path verification
+
+The legacy `compute_fingerprint` API hashes only the final state. Different paths can converge to the same final state and produce identical hashes. The additive strict trace API includes initial state, every input frame and every post-tick snapshot:
+
+```rust
+use drift_harness::{compute_trace_fingerprint, HarnessConfig};
+let trace = compute_trace_fingerprint(sim, HarnessConfig::vacuum(10_000))?;
+println!("{trace}");
+```
+
+Non-vacuum trace verification rejects partial input arrays instead of silently treating missing frames as empty. The legacy final-state fingerprint retains its original behavior for compatibility.
+
+The trace scheme uses versioned, length-prefixed SHA-256 framing and does **not** prove that the application's `state_snapshot()` includes all future-affecting variables. Canonical serialization and toolchain/architecture scope remain integrator responsibilities.
+
 ## Verification
 
 ```rust
@@ -47,11 +61,11 @@ assert!(result.is_ok(), "Simulation is non-deterministic!");
 ## Critical Contract
 
 For determinism verification to be valid:
-- `tick()` must be pure: same inputs → same state transition
+- `tick()` must be deterministic given canonical prior state, complete input and a controlled runtime
 - `state_snapshot()` must capture **ALL** state that affects future ticks
-- Use `to_le_bytes()` for serialization, never text formatting
+- Use defined canonical binary encoding, including float treatment and schema version; raw `to_le_bytes()` alone is not sufficient to normalize all floating-point representations
 
-If you omit state (e.g., velocity), two simulations with identical positions but different velocities will hash identically — then diverge on the next tick.
+If you omit state (e.g., velocity), two simulations with identical positions but different velocities may hash identically and later diverge. A path-sensitive trace detects many, but not all, such errors.
 
 ## Example
 
