@@ -27,6 +27,9 @@
 
 use sha2::{Sha256, Digest};
 
+mod trace;
+pub use trace::{compute_trace_fingerprint, verify_trace_against, TraceError};
+
 /// Trait for simulations
 ///
 /// Implementors must provide:
