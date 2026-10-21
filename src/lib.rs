@@ -136,11 +136,11 @@ pub fn compute_fingerprint<S: DeterministicSim>(mut sim: S, config: HarnessConfi
     }
 
     let snapshot = sim.state_snapshot();
-  
+
     let mut hasher = Sha256::new();
     hasher.update(&snapshot);
     let result = hasher.finalize();
-  
+
     // Convert to hex string
     result.iter().map(|b| format!("{:02x}", b)).collect()
 }
@@ -155,7 +155,7 @@ pub fn verify_against<S: DeterministicSim>(
     expected_hash: &str,
 ) -> Result<(), DeterminismError> {
     let actual_hash = compute_fingerprint(sim, config);
-  
+
     if actual_hash == expected_hash {
         Ok(())
     } else {
@@ -224,10 +224,10 @@ mod tests {
     fn test_verify_against_success() {
         let sim = CounterSim { value: 0 };
         let config = HarnessConfig::vacuum(100);
-      
+
         // Pre-compute the expected hash
         let expected = compute_fingerprint(CounterSim { value: 0 }, config.clone());
-      
+
         // Verify against it
         let result = verify_against(sim, config, &expected);
         assert!(result.is_ok());
@@ -237,7 +237,7 @@ mod tests {
     fn test_verify_against_failure() {
         let sim = CounterSim { value: 0 };
         let config = HarnessConfig::vacuum(100);
-      
+
         let result = verify_against(sim, config, "wrong_hash");
         assert!(result.is_err());
     }
