@@ -40,7 +40,7 @@ impl DeterministicSim for ParticleSim {
 
         // Symplectic Euler Integration (velocity-first)
         // This order is important for energy conservation in physics.
-        
+  
         // 1. Integrate Velocity: v(t+dt) = v(t) + a * dt
         self.velocity.add_scaled(gravity, DT_60HZ);
 
@@ -62,7 +62,7 @@ impl DeterministicSim for ParticleSim {
         // ...will produce identical hashes but DIVERGE on the next tick.
         //
         // This defeats the entire purpose of determinism verification.
-        
+  
         let p = self.position.resolve();
         let v = self.velocity.resolve();
 
